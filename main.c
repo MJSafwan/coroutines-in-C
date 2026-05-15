@@ -2,11 +2,22 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define ROUTINE_YIELD 0
+#define ROUTINE_DONE 1
+#define ROUTINE_CAPACITY 256
+
+typedef uint64_t routine_t;
+typedef void* rctx_t;
+typedef struct {
+    routine_t items[ROUTINE_CAPACITY];
+    size_t count;
+} routine_list;
 /* Implemented in routine.asm */
-uint64_t routine(void *stacks, void *fn, void *arg);
+uint64_t routine(rctx_t ctx, void *fn, void *arg);
 void routine_yield(void);
-int routine_run(uint64_t routine);
+int routine_run(routine_t routine);
 void routine_finish(void);
+extern uint32_t ROUTINE_STACK_SIZE;
 
 void fun(void *arg) {
     char *name = (char *)arg;
@@ -25,23 +36,12 @@ void quick(void *arg) {
     routine_finish();
 }
 
-#define ROUTINE_YIELD 0
-#define ROUTINE_DONE 1
-#define ROUTINE_CAPACITY 256
-#define STACK_SIZE 4096
 
-typedef uint64_t routine_t;
-typedef void* rctx_t;
-
-typedef struct {
-    routine_t items[ROUTINE_CAPACITY];
-    size_t count;
-} routine_list;
 
 rctx_t routine_init(size_t ns) {
     if (ns == 0)
         return NULL;
-    return calloc(ns, STACK_SIZE);
+    return calloc(ns, ROUTINE_STACK_SIZE);
 }
 
 void routine_append(routine_list *s, routine_t r) {
