@@ -1,5 +1,5 @@
 longjmp.s
 main
-main.dSYM
+main.dSYM/*
 *.o
 *.swp
