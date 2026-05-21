@@ -34,7 +34,8 @@ _routine_yield:
     mov x12, sp
     ; shamelessly stolen from musl's setjmp implementation (with modification)
     stp x12, x30, [x11, #-16]!
-    stp x29, xzr, [x11, #-16]!
+    str x29, [x11, #-8]!
+    sub x11, x11, #8
     ldp x29, x30, [x11, #-16]!
     stp x19, x20, [x11, #-16]!
     stp x21, x22, [x11, #-16]!
@@ -52,8 +53,39 @@ _routine_yield:
     mov w0, #0
     ret
 
+.global _routine_sleep
+; void routine_sleep(uint64_t ms)
+_routine_sleep:
+    mov x11, x29
+    add x11, x11, #256
+
+    mov x12, sp
+    stp x12, x30, [x11, #-16]!
+    str x29, [x11, #-8]!
+    ldr x2, [x11, #-8]!
+    ldp x29, x30, [x11, #-16]!
+    stp x19, x20, [x11, #-16]!
+    stp x21, x22, [x11, #-16]!
+    stp x23, x24, [x11, #-16]!
+    stp x25, x26, [x11, #-16]!
+    stp x27, x28, [x11, #-16]!
+    stp x0, x1, [x11, #-16]!
+    stp d8, d9, [x11, #-16]!
+    stp d10, d11, [x11, #-16]!
+    stp d12, d13, [x11, #-16]!
+    stp d14, d15, [x11, #-16]!
+    ldr x12, [x11, #-16]! 
+
+    mov sp, x12
+    cmp x2, 0
+    b.eq routine_sleep_ret
+    str x0, [x2]
+routine_sleep_ret:
+    mov w0, #2
+    ret
+
 .global _routine_run
-; int routine_run(uint64_t routine)
+; int routine_run(uint64_t routine, uint64_t *sleep_ms)
 _routine_run:
     mov x11, x0
     ldp x13, x10, [x11, #-16]!
@@ -61,7 +93,8 @@ _routine_run:
     b.eq routine_next_finish
     
     mov x14, x29
-    ldp x29, xzr, [x11, #-16]!
+    ldr x29, [x11, #-8]!
+    str x1, [x11, #-8]!
     stp x14, x30, [x11, #-16]!
     ldp x19, x20, [x11, #-16]!
     ldp x21, x22, [x11, #-16]!
