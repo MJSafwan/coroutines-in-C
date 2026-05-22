@@ -2,6 +2,7 @@
 
 #ifndef ROUTINE_H_
 #define ROUTINE_H_
+#define ROUTINE_CAPACITY 256
 
 #define ROUTINE_YIELD 0
 #define ROUTINE_DONE 1
@@ -14,6 +15,21 @@ typedef union {
     uint64_t sleep_ms;
     routine_t a_routine;
 } routine_res;
+typedef enum {
+    RS_NORMAL,
+    RS_SLEEPING,
+    RS_AWAITING,
+} routine_state;
+typedef struct {
+    routine_t id;
+    routine_state state;
+    routine_t a_routine;
+    uint64_t sleep_ns;
+} routine_status;
+typedef struct {
+    routine_status items[ROUTINE_CAPACITY];
+    size_t count;
+} routine_list;
 /* Implemented in routine.asm */
 uint64_t routine(rctx_t ctx, void *fn, void *arg);
 void routine_yield(void);

@@ -6,28 +6,10 @@
 #include "routine.h"
 #include <time.h>
 
-#define ROUTINE_CAPACITY 256
 #define NS 1e6
 
 #define PROMISE(T) struct { T arg; void *out; }
 
-typedef enum {
-    RS_NORMAL,
-    RS_SLEEPING,
-    RS_AWAITING,
-} routine_state;
-
-typedef struct {
-    routine_t id;
-    routine_state state;
-    routine_t a_routine;
-    uint64_t sleep_ns;
-} routine_status;
-
-typedef struct {
-    routine_status items[ROUTINE_CAPACITY];
-    size_t count;
-} routine_list;
 
 rctx_t routine_init(size_t ns) {
     if (ns == 0)
@@ -111,14 +93,22 @@ uint64_t get_time_ns() {
     return (uint64_t)ts.tv_sec * 1000 * NS + (uint64_t)ts.tv_nsec;
 }
 
-void routine_transition(routine_list *s, routine_status *r, uint64_t dt) {
+routine_state routine_transition(
+        routine_list *s,
+        routine_status *r,
+        uint64_t dt,
+        void* out) {
+
     routine_res rr = {0};
-    switch (r->state) {
+    routine_state state = r->state;
+    switch (state) {
         case RS_SLEEPING:
             if (r->sleep_ns <= dt) { 
                 r->state = RS_NORMAL;
+                break;
             }
             r->sleep_ns -= dt;
+            *(uint64_t*)out = r->sleep_ns;
             break;
         case RS_NORMAL:
             {
@@ -145,6 +135,7 @@ void routine_transition(routine_list *s, routine_status *r, uint64_t dt) {
         default:
             break;
     }
+    return state;
 }
 
 int main(void) {
@@ -159,12 +150,31 @@ int main(void) {
     uint64_t prev = t;
     uint64_t dt = 0;
     while (s.count != 0) {
+        bool all_asleep = true;
+        uint64_t min_sleep = UINT64_MAX;
         for (size_t i = 0; i < s.count; ++i) {
-            routine_transition(&s, &s.items[i], dt);
-            prev = t;
-            t = get_time_ns();
-            dt = t - prev;
+            uint64_t out = 0;
+            routine_state old_state = routine_transition(&s, &s.items[i], dt, &out);
+            if (old_state == RS_SLEEPING && all_asleep == true) {
+                if (out < min_sleep) {
+                    min_sleep = out;
+                }
+            } else {
+                all_asleep = false;
+            }
         }
+        if (all_asleep) {
+            uint64_t nsec = min_sleep;
+            uint64_t sec = nsec/(NS*1000);
+            nsec -= sec*1000*NS;
+            struct timespec ts;
+            ts.tv_sec = sec;
+            ts.tv_nsec = nsec;
+            nanosleep(&ts, NULL);
+        }
+        prev = t;
+        t = get_time_ns();
+        dt = t - prev;
     }
 
     return 0;
