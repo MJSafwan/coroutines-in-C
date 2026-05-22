@@ -7,8 +7,6 @@
 #include "routine.h"
 #include "scheduler.h"
 
-
-
 void fun(PROMISE(int) *p) {
     int max = p->arg;
 
