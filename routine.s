@@ -84,6 +84,21 @@ routine_sleep_ret:
     mov w0, #2
     ret
 
+
+.global _routine_panic
+; void routine_panic()
+_routine_panic:
+    mov x11, x29
+    add x11, x11, #256
+    sub x11, x11, #32
+    ldp x29, x30, [x11, #-16]!
+    sub x11, x11, #160
+    ldr x12, [x11, #-16]! 
+    mov sp, x12
+routine_panic_ret:
+    mov w0, #4
+    ret
+
 .global _routine_await
 ; void routine_await(routine_t a_routine)
 _routine_await:

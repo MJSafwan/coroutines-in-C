@@ -97,6 +97,9 @@ routine_state routine_transition(
                     r->a_routine = rr.a_routine;
                     routine_append(s, rr.a_routine);
                 }
+                if (res == ROUTINE_PANIC) {
+                    return ROUTINE_PANIC;
+                }
                 break;
             }
         case RS_AWAITING:
@@ -140,6 +143,11 @@ void scheduler_run(void) {
         for (size_t i = 0; i < sc_rl.count; ++i) {
             uint64_t out = 0;
             routine_state old_state = routine_transition(&sc_rl, &sc_rl.items[i], sc_dt, &out);
+            if (old_state == ROUTINE_PANIC) {
+                fprintf(stderr, "A routine has paniced!\n");
+                fprintf(stderr, "Stopping scheduler...\n");
+                return;
+            }
             if (old_state == RS_SLEEPING && all_asleep == true) {
                 if (out < min_sleep) {
                     min_sleep = out;

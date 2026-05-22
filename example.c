@@ -47,12 +47,17 @@ void bar(void *args) {
     routine_finish();
 }
 
+void mischif(void  *args) {
+    routine_sleep(1000);
+    routine_panic();
+}
 
 int main(void) {
     scheduler_init();
     scheduler_append(foo, NULL);
     scheduler_append(bar, NULL);
     scheduler_append(baz, NULL);
+    //scheduler_append(mischif, NULL);
     scheduler_run();
     scheduler_uninit();
     return 0;
