@@ -1,2 +1,2 @@
-main : main.c routine.s
-	cc -o main -I. main.c routine.s -g
+main : main.c routine.s scheduler.c
+	cc -o main -I. main.c scheduler.c routine.s -g

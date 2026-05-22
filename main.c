@@ -5,44 +5,9 @@
 #include <stdbool.h>
 #include <time.h>
 #include "routine.h"
+#include "scheduler.h"
 
-#define NS 1e6
 
-#define PROMISE(T) struct { T arg; void *out; }
-
-rctx_t context; 
-
-rctx_t routine_init(size_t ns) {
-    if (ns == 0)
-        return NULL;
-    return calloc(ns, ROUTINE_STACK_SIZE);
-}
-
-void routine_append(routine_list *s, routine_t r) {
-    if (s->count == ROUTINE_CAPACITY)
-        return;
-    routine_status ro = {0};
-    ro.id = r;
-    s->items[s->count++] = ro;
-}
-
-bool routine_exists(const routine_list *s, routine_t r) {
-    for (size_t i = 0; i < s->count; ++i) {
-        if (s->items[i].id == r)
-            return true;
-    }
-    return false;
-}
-
-void routine_remove(routine_list *s, routine_t r) {
-    size_t i = 0;
-    for (i = 0; s->items[i].id != r; ++i);
-    
-    routine_status tmp = s->items[s->count-1];
-    s->items[s->count-1] = s->items[i];
-    s->items[i] = tmp;
-    s->count--;
-}
 
 void fun(PROMISE(int) *p) {
     int max = p->arg;
@@ -61,7 +26,7 @@ void foo(void *args) {
     p.arg = 10;
     p.out = &res;
 
-    routine_t r1 = routine(context, fun, &p);
+    routine_t r1 = routine(scheduler_get_context(), fun, &p);
     routine_await(r1);
 
     printf("[foo] out = %d\n", *(int*)p.out);
@@ -84,96 +49,13 @@ void bar(void *args) {
     routine_finish();
 }
 
-uint64_t get_time_ns() {
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (uint64_t)ts.tv_sec * 1000 * NS + (uint64_t)ts.tv_nsec;
-}
-
-routine_state routine_transition(
-        routine_list *s,
-        routine_status *r,
-        uint64_t dt,
-        void* out) {
-
-    routine_res rr = {0};
-    routine_state state = r->state;
-    switch (state) {
-        case RS_SLEEPING:
-            if (r->sleep_ns <= dt) { 
-                r->state = RS_NORMAL;
-                break;
-            }
-            r->sleep_ns -= dt;
-            *(uint64_t*)out = r->sleep_ns;
-            break;
-        case RS_NORMAL:
-            {
-                int res = routine_run(r->id, &rr);
-                if (res == ROUTINE_DONE) {
-                    routine_remove(s, r->id);
-                }
-                if (res == ROUTINE_SLEEP) {
-                    r->state = RS_SLEEPING;
-                    r->sleep_ns = rr.sleep_ms * NS;
-                }
-                if (res == ROUTINE_AWAIT) {
-                    r->state = RS_AWAITING;
-                    r->a_routine = rr.a_routine;
-                    routine_append(s, rr.a_routine);
-                }
-                break;
-            }
-        case RS_AWAITING:
-            if (routine_exists(s, r->a_routine) == false) {
-                r->state = RS_NORMAL;
-            }                    
-            break;
-        default:
-            break;
-    }
-    return state;
-}
 
 int main(void) {
-    routine_list s = {0};
-    context = routine_init(ROUTINE_CAPACITY);
-
-    routine_append(&s, routine(context, foo, NULL));
-    routine_append(&s, routine(context, bar, NULL));
-    routine_append(&s, routine(context, baz, NULL));
-
-    uint64_t t = get_time_ns();
-    uint64_t prev = t;
-    uint64_t dt = 0;
-
-    while (s.count != 0) {
-        bool all_asleep = true;
-        uint64_t min_sleep = UINT64_MAX;
-        for (size_t i = 0; i < s.count; ++i) {
-            uint64_t out = 0;
-            routine_state old_state = routine_transition(&s, &s.items[i], dt, &out);
-            if (old_state == RS_SLEEPING && all_asleep == true) {
-                if (out < min_sleep) {
-                    min_sleep = out;
-                }
-            } else {
-                all_asleep = false;
-            }
-        }
-        if (all_asleep) {
-            uint64_t nsec = min_sleep;
-            uint64_t sec = nsec/(NS*1000);
-            nsec -= sec*1000*NS;
-            struct timespec ts;
-            ts.tv_sec = sec;
-            ts.tv_nsec = nsec;
-            nanosleep(&ts, NULL);
-        }
-        prev = t;
-        t = get_time_ns();
-        dt = t - prev;
-    }
-
+    scheduler_init();
+    scheduler_append(foo, NULL);
+    scheduler_append(bar, NULL);
+    scheduler_append(baz, NULL);
+    scheduler_run();
+    scheduler_uninit();
     return 0;
 }
