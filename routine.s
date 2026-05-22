@@ -84,6 +84,37 @@ routine_sleep_ret:
     mov w0, #2
     ret
 
+.global _routine_await
+; void routine_await(routine_t a_routine)
+_routine_await:
+    mov x11, x29
+    add x11, x11, #256
+
+    mov x12, sp
+    stp x12, x30, [x11, #-16]!
+    str x29, [x11, #-8]!
+    ldr x2, [x11, #-8]!
+    ldp x29, x30, [x11, #-16]!
+    stp x19, x20, [x11, #-16]!
+    stp x21, x22, [x11, #-16]!
+    stp x23, x24, [x11, #-16]!
+    stp x25, x26, [x11, #-16]!
+    stp x27, x28, [x11, #-16]!
+    stp x0, x1, [x11, #-16]!
+    stp d8, d9, [x11, #-16]!
+    stp d10, d11, [x11, #-16]!
+    stp d12, d13, [x11, #-16]!
+    stp d14, d15, [x11, #-16]!
+    ldr x12, [x11, #-16]! 
+
+    mov sp, x12
+    cmp x2, 0
+    b.eq routine_await_ret
+    str x0, [x2]
+routine_await_ret:
+    mov w0, #3
+    ret
+
 .global _routine_run
 ; int routine_run(uint64_t routine, uint64_t *sleep_ms)
 _routine_run:
