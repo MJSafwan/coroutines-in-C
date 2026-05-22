@@ -6,7 +6,7 @@ Implementation for coroutines in ARM64 assembly for MacOS.
 
 # Example
 
-The 'main.c' file shows an example of how the coroutine functionality works by implementing a simple scheduler.
+The 'example.c' file shows an example of how the coroutine functionality works. The file 'scheduler.c' implements a simple scheduler that handles yielding, asynchronous sleeping, and awaiting other routines.
 
 # Building
 
@@ -16,7 +16,7 @@ After cloning, run
 make
 ```
 
-Then, an executable file 'main' should be produced.
+Then, an executable file 'example' should be produced.
 
 # License
 
