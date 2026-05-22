@@ -116,7 +116,7 @@ routine_await_ret:
     ret
 
 .global _routine_run
-; int routine_run(uint64_t routine, uint64_t *sleep_ms)
+; int routine_run(uint64_t routine, routine_res *rr)
 _routine_run:
     mov x11, x0
     ldp x13, x10, [x11, #-16]!
