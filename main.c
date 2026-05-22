@@ -3,13 +3,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include "routine.h"
 #include <time.h>
+#include "routine.h"
 
 #define NS 1e6
 
 #define PROMISE(T) struct { T arg; void *out; }
 
+rctx_t context; 
 
 rctx_t routine_init(size_t ns) {
     if (ns == 0)
@@ -55,7 +56,6 @@ void fun(PROMISE(int) *p) {
 }
 
 void foo(void *args) {
-    rctx_t context = routine_init(1);
     int res = 0;
     PROMISE(int) p = {0};
     p.arg = 10;
@@ -65,13 +65,10 @@ void foo(void *args) {
     routine_await(r1);
 
     printf("[foo] out = %d\n", *(int*)p.out);
-    free(context);
     routine_finish();
 }
 
 void baz(void *args) {
-    rctx_t context = routine_init(1);
-
     printf("[baz] Waiting for 5 second...\n");
     routine_sleep(5000);
     printf("[baz] Finished waiting!\n");
@@ -140,8 +137,8 @@ routine_state routine_transition(
 
 int main(void) {
     routine_list s = {0};
+    context = routine_init(ROUTINE_CAPACITY);
 
-    rctx_t context = routine_init(ROUTINE_CAPACITY);
     routine_append(&s, routine(context, foo, NULL));
     routine_append(&s, routine(context, bar, NULL));
     routine_append(&s, routine(context, baz, NULL));
@@ -149,6 +146,7 @@ int main(void) {
     uint64_t t = get_time_ns();
     uint64_t prev = t;
     uint64_t dt = 0;
+
     while (s.count != 0) {
         bool all_asleep = true;
         uint64_t min_sleep = UINT64_MAX;
