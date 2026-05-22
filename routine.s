@@ -86,15 +86,19 @@ routine_sleep_ret:
 
 
 .global _routine_panic
-; void routine_panic()
+; void routine_panic(uint64_t panic_code)
 _routine_panic:
     mov x11, x29
     add x11, x11, #256
-    sub x11, x11, #32
+    sub x11, x11, #24
+    ldr x2, [x11, #-8]!
     ldp x29, x30, [x11, #-16]!
     sub x11, x11, #160
     ldr x12, [x11, #-16]! 
     mov sp, x12
+    cmp x2, 0
+    b.eq routine_panic_ret
+    str x0, [x2]
 routine_panic_ret:
     mov w0, #4
     ret

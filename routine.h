@@ -14,6 +14,7 @@ typedef uint64_t routine_t;
 typedef void* rctx_t;
 typedef union {
     uint64_t sleep_ms;
+    uint64_t panic_code;
     routine_t a_routine;
 } routine_res;
 /* Implemented in routine.asm */
@@ -21,7 +22,7 @@ uint64_t routine(rctx_t ctx, void *fn, void *arg);
 void routine_yield(void);
 void routine_sleep(uint64_t sleep_ms);
 void routine_await(routine_t a_routine);
-void routine_panic(void);
+void routine_panic(uint64_t panic_code);
 int routine_run(routine_t routine, routine_res *rr);
 void routine_finish(void);
 extern uint32_t ROUTINE_STACK_SIZE;

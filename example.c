@@ -47,9 +47,9 @@ void bar(void *args) {
     routine_finish();
 }
 
-void mischif(void  *args) {
+void mischief(void  *args) {
     routine_sleep(1000);
-    routine_panic();
+    routine_panic(0);
 }
 
 int main(void) {
@@ -57,7 +57,7 @@ int main(void) {
     scheduler_append(foo, NULL);
     scheduler_append(bar, NULL);
     scheduler_append(baz, NULL);
-    //scheduler_append(mischif, NULL);
+    //scheduler_append(mischief, NULL);
     scheduler_run();
     scheduler_uninit();
     return 0;

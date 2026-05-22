@@ -98,6 +98,7 @@ routine_state routine_transition(
                     routine_append(s, rr.a_routine);
                 }
                 if (res == ROUTINE_PANIC) {
+                    *(uint64_t *)out = rr.panic_code;
                     return ROUTINE_PANIC;
                 }
                 break;
@@ -144,7 +145,7 @@ void scheduler_run(void) {
             uint64_t out = 0;
             routine_state old_state = routine_transition(&sc_rl, &sc_rl.items[i], sc_dt, &out);
             if (old_state == ROUTINE_PANIC) {
-                fprintf(stderr, "A routine has paniced!\n");
+                fprintf(stderr, "A routine has panice with code %llu.\n", out);
                 fprintf(stderr, "Stopping scheduler...\n");
                 return;
             }
