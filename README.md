@@ -6,17 +6,20 @@ Implementation for coroutines in ARM64 assembly for MacOS.
 
 # Example
 
-The 'example.c' file shows an example of how the coroutine functionality works. The file 'scheduler.c' implements a simple scheduler that handles yielding, asynchronous sleeping, and awaiting other routines.
+There is a directory called "examples" that shows some example usecases of such library.
+These showcase a simple demo in the "1-demo" directory, and a demonstration of a simple tcp echo server in the "2-tcp\_echo" directory.
+
+
+In the tcp echo server example, the port 8080 is used on address 127.0.0.1. This, however, can be modified in the source file by modifiying the HOST\_PORT and HOST\_ADDR macros. 
 
 # Building
 
-To build the example, you must have clang or compatible compiler installed.
-After cloning, run
+To build the examples, you must have clang or compatible compiler installed.
+After cloning, go to the appropriate example directory and run
 ```sh
 make
 ```
-
-Then, an executable file 'example' should be produced.
+A file named "main" should be produced.
 
 # License
 
