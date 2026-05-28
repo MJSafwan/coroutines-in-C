@@ -1,6 +1,6 @@
 .align 4
 
-.equ STACK_PRE_SIZE, 240
+.equ STACK_PRE_SIZE, 480
 .equ STACK_OFF, STACK_PRE_SIZE+16
 
 .section __TEXT,__text
@@ -40,10 +40,8 @@ _routine_yield:
 
     mov x12, sp
     ; shamelessly stolen from musl's setjmp implementation (with modification)
+
     stp x12, x30, [x11, #-16]!
-    mov x13, x11
-
-
     str x29, [x11, #-8]!
     sub x11, x11, #8
     ldp x29, x30, [x11, #-16]!
@@ -57,7 +55,6 @@ _routine_yield:
     stp d10, d11, [x11, #-16]!
     stp d12, d13, [x11, #-16]!
     stp d14, d15, [x11, #-16]!
-
     ldr x12, [x11, #-16]! 
 
     ldp x19, x20, [x11, #-16]!
@@ -65,7 +62,6 @@ _routine_yield:
     ldp x23, x24, [x11, #-16]!
     ldp x25, x26, [x11, #-16]!
     ldp x27, x28, [x11, #-16]!
-    ldp x0, x1, [x11, #-16]!
     ldp d8, d9, [x11, #-16]!
     ldp d10, d11, [x11, #-16]!
     ldp d12, d13, [x11, #-16]!
@@ -104,7 +100,6 @@ _routine_sleep:
     ldp x23, x24, [x11, #-16]!
     ldp x25, x26, [x11, #-16]!
     ldp x27, x28, [x11, #-16]!
-    ldp x0, x1, [x11, #-16]!
     ldp d8, d9, [x11, #-16]!
     ldp d10, d11, [x11, #-16]!
     ldp d12, d13, [x11, #-16]!
@@ -160,13 +155,11 @@ _routine_await:
     stp d14, d15, [x11, #-16]!
     ldr x12, [x11, #-16]! 
 
-
     ldp x19, x20, [x11, #-16]!
     ldp x21, x22, [x11, #-16]!
     ldp x23, x24, [x11, #-16]!
     ldp x25, x26, [x11, #-16]!
     ldp x27, x28, [x11, #-16]!
-    ldp x0, x1, [x11, #-16]!
     ldp d8, d9, [x11, #-16]!
     ldp d10, d11, [x11, #-16]!
     ldp d12, d13, [x11, #-16]!
@@ -195,7 +188,6 @@ _routine_run:
     stp x23, x24, [x12, #-16]!
     stp x25, x26, [x12, #-16]!
     stp x27, x28, [x12, #-16]!
-    stp x0, x1, [x12, #-16]!
     stp d8, d9, [x12, #-16]!
     stp d10, d11, [x12, #-16]!
     stp d12, d13, [x12, #-16]!
