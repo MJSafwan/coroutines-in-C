@@ -158,6 +158,7 @@ int main(void) {
     }
 
     listen(fd, BL);
+    printf("Listening on %s:%d\n", HOST_ADDR, HOST_PORT);
     scheduler_init();    
     scheduler_append(listening_loop, NULL);
     scheduler_run();
