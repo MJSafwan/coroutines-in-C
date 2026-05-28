@@ -10,13 +10,13 @@ _routine:
     movk x10, #0, lsl #32
     movk x10, #0, lsl #48
     mov x11, x0
-    add x11, x11, x12
+    add x11, x11, x10
 routine_mk_chk:
     ldr x12, [x11, #-16]
     cmp x12, #0
     b.eq routine_mk_end
 routine_mk_body:
-    add x11, x11, x12
+    add x11, x11, x10
     b routine_mk_chk
 routine_mk_end:
     mov x6, x11
