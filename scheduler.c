@@ -7,7 +7,6 @@
 #include "routine.h"
 #include "scheduler.h"
 
-
 typedef enum {
     RS_NORMAL,
     RS_SLEEPING,

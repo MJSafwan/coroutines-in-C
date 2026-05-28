@@ -6,14 +6,17 @@ _routine:
     adrp x10, _ROUTINE_STACK_SIZE@PAGE
     add x10, x10, _ROUTINE_STACK_SIZE@PAGEOFF
     ldr x10, [x10]
+    ; We only need the first 32 bits
+    movk x10, #0, lsl #32
+    movk x10, #0, lsl #48
     mov x11, x0
-    add x11, x11, x10
+    add x11, x11, x12
 routine_mk_chk:
     ldr x12, [x11, #-16]
     cmp x12, #0
     b.eq routine_mk_end
 routine_mk_body:
-    add x11, x11, x10
+    add x11, x11, x12
     b routine_mk_chk
 routine_mk_end:
     mov x6, x11
