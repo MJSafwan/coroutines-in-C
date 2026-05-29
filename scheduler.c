@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdlib.h>
-#include <stdargs.h>
+#include <stdarg.h>
 #include "routine.h"
 #include "scheduler.h"
 
@@ -28,8 +28,8 @@ static rctx_t sc_context;
 static routine_list sc_rl = {0};
 static uint64_t sc_dt = 0;
 
-__attribute__ ((format (printf, 1, 2)))
-[[noreturn]] xfatal(const char *fmt, ...) {
+__attribute__((format (printf, 1, 2)))
+[[noreturn]] int xfatal(const char *fmt, ...) {
     fprintf(stderr, "[Fatal] ");
     va_list l;
     va_start(l, fmt);
@@ -44,7 +44,7 @@ void *xcalloc(size_t count, size_t size) {
         xfatal("Trying to initialize zero bytes!\n");
     void *c = calloc(count, size);
     if (c == NULL)
-        xfatal("Failed to calloc %d bytes!\n", total);
+        xfatal("Failed to calloc %zu bytes!\n", total);
     return c;
 }
 
