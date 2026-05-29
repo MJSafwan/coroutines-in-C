@@ -25,7 +25,8 @@ void foo(void *args) {
     p.out = &res;
 
     routine_t r1 = routine_make(fun, &p);
-    routine_await(r1);
+    if (r1 != 0)
+        routine_await(r1);
 
     printf("[foo] out = %d\n", *(int*)p.out);
     routine_finish();

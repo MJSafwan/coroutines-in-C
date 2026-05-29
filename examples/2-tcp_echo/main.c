@@ -93,8 +93,10 @@ void handle_connection(int *rfd_ptr) {
         routine_finish();
     }
     routine_t w = routine_make(async_write, &d);
-    routine_await(r);
-    routine_await(w);
+    if (r != 0 && w != 0) {
+        routine_await(r);
+        routine_await(w);
+    }
 
     close(rfd);
     free(rfd_ptr);
