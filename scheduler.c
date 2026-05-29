@@ -29,7 +29,7 @@ static routine_list sc_rl = {0};
 static uint64_t sc_dt = 0;
 
 __attribute__((format (printf, 1, 2)))
-[[noreturn]] int xfatal(const char *fmt, ...) {
+[[noreturn]] static int xfatal(const char *fmt, ...) {
     fprintf(stderr, "[Fatal] ");
     va_list l;
     va_start(l, fmt);
@@ -38,7 +38,7 @@ __attribute__((format (printf, 1, 2)))
     exit(1);
 }
 
-void *xcalloc(size_t count, size_t size) {
+static void *xcalloc(size_t count, size_t size) {
     size_t total = count * size;
     if (total == 0)
         xfatal("Trying to initialize zero bytes!\n");
@@ -60,7 +60,7 @@ void routine_append(routine_list *s, routine_t r) {
     s->items[s->count++] = ro;
 }
 
-int routine_get(const routine_list *s, routine_t r) {
+static int routine_get(const routine_list *s, routine_t r) {
     for (size_t i = 0; i < s->count; ++i) {
         if (s->items[i].id == r)
             return i;
@@ -68,12 +68,11 @@ int routine_get(const routine_list *s, routine_t r) {
     return -1;
 }
 
-bool routine_exists(const routine_list *s, routine_t r) {
+static bool routine_exists(const routine_list *s, routine_t r) {
     return routine_get(s, r) == -1 ? false : true;
 }
 
-
-void routine_remove(routine_list *s, routine_t r) {
+static void routine_remove(routine_list *s, routine_t r) {
     size_t i = routine_get(s, r);
     if (i == -1)
         return;
@@ -83,13 +82,14 @@ void routine_remove(routine_list *s, routine_t r) {
     s->items[i] = tmp;
     s->count--;
 }
-uint64_t get_time_ns() {
+
+static uint64_t get_time_ns() {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (uint64_t)ts.tv_sec * 1000 * NS + (uint64_t)ts.tv_nsec;
 }
 
-routine_state routine_transition(
+static routine_state routine_transition(
         routine_list *s,
         routine_status *r,
         uint64_t dt,
