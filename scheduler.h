@@ -8,6 +8,7 @@
 #define PROMISE(T) struct { T arg; void *out; }
 void scheduler_init(void);
 void scheduler_uninit(void);
+routine_t routine_make(void *f, void* args);
 void scheduler_append(void *f, void* args);
 rctx_t scheduler_get_context();
 uint64_t scheduler_get_dt(void);

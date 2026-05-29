@@ -86,13 +86,13 @@ void handle_connection(int *rfd_ptr) {
     d.len = 1024;
     d.buff = buff;
 
-    routine_t r = routine(scheduler_get_context(), async_read, &d);
+    routine_t r = routine_make(async_read, &d);
     if (d.bytes_read == -1) {
         close(rfd);
         free(rfd_ptr);
         routine_finish();
     }
-    routine_t w = routine(scheduler_get_context(), async_write, &d);
+    routine_t w = routine_make(async_write, &d);
     routine_await(r);
     routine_await(w);
 
@@ -119,7 +119,6 @@ void listening_loop(void *a) {
         } else {
             int *rfd_mallocd = malloc(sizeof(int));
             *rfd_mallocd = rfd;
-            routine_t r = routine(scheduler_get_context(), handle_connection, rfd_mallocd);
             scheduler_append(handle_connection, rfd_mallocd);
             routine_yield();
         }

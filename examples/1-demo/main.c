@@ -24,7 +24,7 @@ void foo(void *args) {
     p.arg = 10;
     p.out = &res;
 
-    routine_t r1 = routine(scheduler_get_context(), fun, &p);
+    routine_t r1 = routine_make(fun, &p);
     routine_await(r1);
 
     printf("[foo] out = %d\n", *(int*)p.out);

@@ -72,6 +72,7 @@ bool routine_exists(const routine_list *s, routine_t r) {
     return routine_get(s, r) == -1 ? false : true;
 }
 
+
 void routine_remove(routine_list *s, routine_t r) {
     size_t i = routine_get(s, r);
     if (i == -1)
@@ -148,6 +149,13 @@ void scheduler_uninit(void) {
 
 rctx_t scheduler_get_context() {
     return sc_context;
+}
+
+routine_t routine_make(void *f, void* args) {
+    if (sc_rl.count >= ROUTINE_CAPACITY)
+        return 0;
+    else
+        return routine(sc_context, f, args);
 }
 
 void scheduler_append(void *f, void* args) {
