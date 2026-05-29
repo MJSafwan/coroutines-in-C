@@ -60,17 +60,22 @@ void routine_append(routine_list *s, routine_t r) {
     s->items[s->count++] = ro;
 }
 
-bool routine_exists(const routine_list *s, routine_t r) {
+int routine_get(const routine_list *s, routine_t r) {
     for (size_t i = 0; i < s->count; ++i) {
         if (s->items[i].id == r)
-            return true;
+            return i;
     }
-    return false;
+    return -1;
+}
+
+bool routine_exists(const routine_list *s, routine_t r) {
+    return routine_get(s, r) == -1 ? false : true;
 }
 
 void routine_remove(routine_list *s, routine_t r) {
-    size_t i = 0;
-    for (i = 0; s->items[i].id != r; ++i);
+    size_t i = routine_get(s, r);
+    if (i == -1)
+        return;
     
     routine_status tmp = s->items[s->count-1];
     s->items[s->count-1] = s->items[i];
