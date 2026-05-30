@@ -73,7 +73,7 @@ static bool routine_exists(const routine_list *s, routine_t r) {
 }
 
 static void routine_remove(routine_list *s, routine_t r) {
-    size_t i = routine_get(s, r);
+    int i = routine_get(s, r);
     if (i == -1)
         return;
     
